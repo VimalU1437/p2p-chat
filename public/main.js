@@ -3,6 +3,8 @@ const msg = document.querySelector(".msg");
 const btn = document.getElementById("connect")
 const send = document.querySelector(".send");
 const txt = document.querySelector(".txt");
+const videoElm = document.querySelector(".stream");
+const myvid = document.querySelector(".myvid")
 
 // console.log(socket);
 
@@ -20,6 +22,8 @@ lc.onicecandidate = e =>{
     socket.emit("offer",lc.localDescription);
 }
 
+
+
 const sendChannel = lc.createDataChannel("sendChannel");
      sendChannel.onmessage =e =>  {
         const p = document.createElement("p");
@@ -27,13 +31,14 @@ const sendChannel = lc.createDataChannel("sendChannel");
         msg.appendChild(p);
      }
        sendChannel.onopen = e => {
-        alert("open for chat")
+        alert("open for chat");
         send.disabled = false;
     };
          sendChannel.onclose =e => {
             alert("chat closed!!!!!!")
             send.disabled = true
          };
+
 
 send.onclick = e=>{
     sendChannel.send(txt.value);
@@ -44,12 +49,30 @@ send.onclick = e=>{
     txt.value = "";
 }
 btn.onclick = ()=>{
-    lc.createOffer().then(o=>lc.setLocalDescription(o));
+    navigator.mediaDevices.getUserMedia({
+        video:true
+    }).then(stream=>{
+        console.log(stream.getVideoTracks());
+        // myvid.srcObject = stream;
+        lc.addTrack(stream.getVideoTracks()[0],stream);
+        lc.createOffer().then(o=>lc.setLocalDescription(new RTCSessionDescription(o)));
+    })
+    lc.ontrack = e => {
+        console.log("on track");
+        console.log(e);
+        videoElm.srcObject = e.streams[0];
+    }
 }
 
+
 socket.on("answer",answer=>{
-    console.log(answer);
-    lc.setRemoteDescription(answer).then(()=>console.log(done));
+    // console.log(answer);
+    lc.setRemoteDescription(new RTCSessionDescription(answer)).then(()=>{
+        
+        console.log("done");
+        
+    }
+        );
 })
 
 
