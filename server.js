@@ -12,10 +12,10 @@ const app = express();
 
 const server = http.createServer(app);
 const io = socket(server,{cors:{
-    origin:"*:*"
+    origin:"*"
 }});
 
-app.use(cors());
+
 
 io.on("connection",socket=>{
     console.log("new connection");
