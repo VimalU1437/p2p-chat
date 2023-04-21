@@ -12,8 +12,7 @@ const app = express();
 
 const server = http.createServer(app);
 const io = socket(server,{cors:{
-    origin:"*",
-    methods:["GET","POST"]
+    origin:"*:*"
 }});
 
 app.use(cors());
